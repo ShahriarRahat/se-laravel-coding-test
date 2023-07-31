@@ -5,7 +5,6 @@ This is a coding test from Mediusware. The main requirements of this project are
 - Implement a banking system with two types of users: Individual and Business.
 - The system should support deposit and withdrawal operations for both types of users.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
 ## How to set up and run the project
 
