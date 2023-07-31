@@ -17,11 +17,11 @@ You'll need [Composer](https://getcomposer.org/download/) and MySQL/MariaDB for 
 Setting Up the project is pretty simple. Just follow the instruction below:
 
 - Clone the repository first
-- Copy .env.example and paste in the same direcory renaming it to *.env*
+- Copy .env.example and paste in the same direcory renaming it to ***.env***
 - Update your database credentials in .env
-- Open a terminal in the current directory and run *composer u*
-- After successfully completing the composer update process run *php artisan migrate:fresh*
-- Run *php artisan serve*
+- Open a terminal in the current directory and run ***composer u***
+- After successfully completing the composer update process run ***php artisan migrate:fresh***
+- Run ***php artisan serve***
 - You can also use the virtual environments according to their respective instruction to get the site up and running
 
 
