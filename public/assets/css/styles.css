@@ -21,3 +21,9 @@ td, th {
     border-radius: 5px !important;
     padding: 5px 10px !important;
 }
+
+.balance-section {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}

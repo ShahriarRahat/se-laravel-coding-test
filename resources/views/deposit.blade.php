@@ -27,8 +27,11 @@
                     @endforelse
                 </tbody>
             </table>
-            <h2 class="mt-16 text-xl font-semibold text-gray-900 dark:text-white">Total : {{ $data['total'] }}</h2>
-            
+            <div class="balance-section">
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Total : {{ $data['total'] }}</h2>
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Balance : {{ $data['balance'] }}</h2>
+            </div>
+
         @else
             <div class="flex justify-center items-center">
                 <h2 class="mt-16 text-xl font-semibold text-gray-900 dark:text-white">Please <a href="{{ route('login') }}" class="text-red">Login</a> or <a href="{{ route('register') }}" class="text-red">Register</a> to continue</h2>
@@ -39,11 +42,11 @@
                 <div class="flex justify-center items-center">
                     <h2 class="mt-6 text-xl font-semibold text-gray-900 dark:text-white">Add</h2>
                 </div>
-    
+
                 <div class="flex justify-center items-center mt-4">
                     <form action="{{ route('deposit') }}" method="POST">
                         @csrf
-        
+
                         <div class="mb-4">
                             <div>
                                 <label for="amount" class="text-white">Amount
@@ -54,9 +57,9 @@
                                 </label>
                             </div>
                         </div>
-    
+
                         <button type="submit" class="mt-4 primary-button">Deposit</button>
-        
+
                     </form>
                 </div>
             </div>

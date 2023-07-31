@@ -17,9 +17,7 @@ class TransactionController extends Controller
 
         if (auth()->check()) {
             $data['transactions'] = auth()->user()->transactions;
-            $data['deposits'] = auth()->user()->deposits->sum('amount');
-            $data['withdrawals'] = auth()->user()->withdrawals->sum('amount');
-            $data['balance'] = $data['deposits'] - $data['withdrawals'];
+            $data['balance'] = auth()->user()->balance;
         }
 
         return view('welcome', compact('data'));
@@ -29,6 +27,7 @@ class TransactionController extends Controller
     {
         $data['deposits'] = auth()->user()->deposits;
         $data['total'] = $data['deposits']->sum('amount');
+        $data['balance'] = auth()->user()->balance;
         return view('deposit', compact('data'));
     }
 
@@ -36,6 +35,7 @@ class TransactionController extends Controller
     {
         $data['withdrawals'] = auth()->user()->withdrawals;
         $data['total'] = $data['withdrawals']->sum('amount');
+        $data['balance'] = auth()->user()->balance;
         return view('withdrawal', compact('data'));
     }
 
@@ -52,16 +52,21 @@ class TransactionController extends Controller
 
         DB::beginTransaction();
         try {
-            Transaction::create([
-                'user_id' => auth()->user()->id,
+            $user = User::where('id', auth()->id())->first();
+
+            $transaction = Transaction::create([
+                'user_id' => $user->id,
                 'amount' => $request->amount,
+                'fee' => $this->feeCount($request->amount),
                 'transaction_type' => 'withdrawal',
+                'date' => now()->toDateString()
             ]);
-            $balance = auth()->user()->deposits->sum('amount') - auth()->user()->withdrawals->sum('amount');
-            $user = User::where('id', auth()->user()->id)->first();
+
+            $balance = $user->balance - ($transaction->amount + $transaction->fee);
             $user->update([
                 'balance' => $balance
             ]);
+
             DB::commit();
             Toastr::success('Withdrawal Successful');
             return redirect()->back();
@@ -85,24 +90,56 @@ class TransactionController extends Controller
 
         DB::beginTransaction();
         try {
+            $user = User::where('id', auth()->id())->first();
+
             Transaction::create([
-                'user_id' => auth()->user()->id,
+                'user_id' => $user->id,
                 'amount' => $request->amount,
                 'transaction_type' => 'deposit',
+                'date' => now()->toDateString()
             ]);
-            $user = User::where('id', auth()->user()->id)->first();
-            $balance = auth()->user()->deposits->sum('amount') - auth()->user()->withdrawals->sum('amount');
+
+            $balance = $user->balance + $request->amount;
             $user->update([
                 'balance' => $balance
             ]);
+
             DB::commit();
             Toastr::success('Deposit Successful');
             return redirect()->back();
         }catch (\Throwable $th) {
+            dd($th);
             DB::rollBack();
             Toastr::error('Sorry! Something went wrong');
             return redirect()->back();
         }
+    }
+
+    private function feeCount($amount)
+    {
+        $user = auth()->user();
+
+        $start_date = now()->startOfMonth();
+        $end_date = now()->endOfMonth();
+
+        $currentMonthWithdrawal = $user->withdrawals->whereBetween('date', [$start_date, $end_date])->where('user_id', $user->id)->sum('amount');
+
+        if($user->account_type == 'individual') {
+            if(now()->format('l') == 'Friday' || $currentMonthWithdrawal <= 5000) {
+                $fee = 0;
+            }else{
+                $fee = $amount <= 1000 ? 0 : ($amount -1000) * 0.015/100;
+            }
+        }else{
+            $totalWithDrawal = $user->withdrawals->sum('amount');
+            if($totalWithDrawal > 5000) {
+                $fee = $amount * 0.015/100;
+            }else{
+                $fee = $amount * 0.025/100;
+            }
+        }
+
+        return $fee;
     }
 
 }
